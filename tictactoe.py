@@ -9,7 +9,13 @@ class TicTacToeBoard:
         self.finished = False
 
     def get(self):
-        return json.dumps({"board": self.board, "current_player": self.current_player})
+        return json.dumps(
+            {
+                "board": self.board,
+                "current_player": self.current_player,
+                "is_finished": self.finished,
+            }
+        )
 
     def is_finished(self):
         return self.finished
@@ -19,7 +25,7 @@ class TicTacToeBoard:
 
     def make_move(self, row, column, player):
         if self.finished:
-            raise ValueError("Can't play once it's finished")
+            raise ValueError("can't play once it's finished")
         if player not in ("X", "O"):
             raise ValueError("invalid player")
         if not (1 <= row <= 3 and 1 <= column <= 3):

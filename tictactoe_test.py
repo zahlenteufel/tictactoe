@@ -10,7 +10,7 @@ class TestClass:
         b.make_move(1, 2, "O")
         assert (
             b.get()
-            == '{"board": [["X", "O", " "], [" ", " ", " "], [" ", " ", " "]], "current_player": "O"}'
+            == '{"board": [["X", "O", " "], [" ", " ", " "], [" ", " ", " "]], "current_player": "O", "is_finished": false}'
         )
 
     def test_make_valid_move(self):
