@@ -44,3 +44,38 @@ class TestClass:
 
         with pytest.raises(ValueError, match="can't play twice"):
             b.make_move(2, 2, "X")
+
+    def test_finished(self):
+        b = TicTacToeBoard()
+
+        moves = [
+            (1, 1, "X"),
+            (2, 1, "O"),
+            (1, 2, "X"),
+            (2, 2, "O"),
+            (1, 3, "X"),
+        ]
+
+        for r, c, p in moves:
+            assert not b.is_finished()
+            b.make_move(r, c, p)
+
+        assert b.is_finished()
+
+    def test_cant_play_after_finished(self):
+        b = TicTacToeBoard()
+
+        moves = [
+            (1, 1, "X"),
+            (2, 1, "O"),
+            (1, 2, "X"),
+            (2, 2, "O"),
+            (1, 3, "X"),
+        ]
+
+        for r, c, p in moves:
+            assert not b.is_finished()
+            b.make_move(r, c, p)
+
+        with pytest.raises(ValueError, match="finished"):
+            b.make_move(2, 3, "O")
