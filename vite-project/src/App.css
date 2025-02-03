@@ -10,6 +10,7 @@
   grid-template-columns: repeat(3, 103px);
   justify-content: space-evenly;
   gap: 2px;
+  margin-bottom: 20px;
 }
 
 .board > div {
@@ -18,6 +19,10 @@
   background-color: grey;
   border: black 2px solid;
   cursor: pointer;
+}
+
+.board > div:hover {
+  background-color: lightgrey;
 }
 
 .card {
