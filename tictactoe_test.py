@@ -8,10 +8,11 @@ class TestClass:
         b = TicTacToeBoard()
         b.make_move(1, 1, "X")
         b.make_move(1, 2, "O")
-        assert (
-            b.get()
-            == '{"board": [["X", "O", " "], [" ", " ", " "], [" ", " ", " "]], "current_player": "O", "is_finished": false}'
-        )
+        assert b.get() == {
+            "board": [["X", "O", " "], [" ", " ", " "], [" ", " ", " "]],
+            "current_player": "O",
+            "is_finished": False,
+        }
 
     def test_make_valid_move(self):
         b = TicTacToeBoard()

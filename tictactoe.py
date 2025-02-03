@@ -9,13 +9,11 @@ class TicTacToeBoard:
         self.finished = False
 
     def get(self):
-        return json.dumps(
-            {
-                "board": self.board,
-                "current_player": self.current_player,
-                "is_finished": self.finished,
-            }
-        )
+        return {
+            "board": self.board,
+            "current_player": self.current_player,
+            "is_finished": self.finished,
+        }
 
     def is_finished(self):
         return self.finished
