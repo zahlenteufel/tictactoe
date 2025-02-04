@@ -14,11 +14,13 @@
 }
 
 .board > div {
+  align-content: center;
   height: 100px;
   width: 100px;
   background-color: grey;
   border: black 2px solid;
   cursor: pointer;
+  font-size: 60px;
 }
 
 .board > div:hover {
