@@ -33,31 +33,23 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      fetch("/api/board")
-        .then((response) => {
-          response.json().then((d) => {
-            if (response.ok) {
-              if (JSON.stringify(d) != JSON.stringify(data)) {
-                setData(d);
-                console.log("Set data: ", d);
-              }
-              setError(null);
-            } else {
-              setData(null);
-              console.log("Set data: ERROR");
-              setError(d);
-            }
-          });
-        })
-        .catch((err) => {
-          setData(null);
-          console.log("there was ERROR");
-          setError(err + "");
-        });
+      const response = await fetch("/api/board");
+      if (!response.ok) {
+        const error = await response.text();
+        setData(null);
+        setError(error === "" ? "some error ocurred" : error);
+        return;
+      }
+      const json = await response.json();
+      if (JSON.stringify(json) != JSON.stringify(data)) {
+        setData(json);
+        console.log("Set data: ", json);
+      }
+      setError(null);
     };
     const intervalId = setInterval(fetchData, pollInterval);
     return () => clearInterval(intervalId); // Cleanup interval on component unmount.
-  }, [data]);
+  }, [data, error, setData, setError]);
 
   return (
     <>
