@@ -97,10 +97,10 @@ def get_match():
             game_id = random_str(5)
             k1, _ = last_update.popitem()
             k2, _ = last_update.popitem()
-            matched[k1] = game_id
-            matched[k2] = game_id
+            matched[k1] = {"game_id": game_id, "play_as": "X"}
+            matched[k2] = {"game_id": game_id, "play_as": "O"}
             if id in matched:
-                return {"game_id": matched[id]}
+                return matched[id]
         return {"game_id": None}
     finally:
         print(last_update)
