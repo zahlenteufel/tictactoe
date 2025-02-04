@@ -63,6 +63,29 @@ class TestClass:
 
         assert b.is_finished()
 
+    def test_no_more_moved_is_finished(self):
+        b = TicTacToeBoard()
+        #  XOX
+        #  XOX
+        #  OXO
+        moves = [
+            (1, 1, "X"),
+            (1, 2, "O"),
+            (1, 3, "X"),
+            (2, 2, "O"),
+            (2, 1, "X"),
+            (3, 1, "O"),
+            (2, 3, "X"),
+            (3, 3, "O"),
+            (3, 2, "X"),
+        ]
+
+        for r, c, p in moves:
+            assert not b.is_finished()
+            b.make_move(r, c, p)
+
+        assert b.is_finished()
+
     def test_cant_play_after_finished(self):
         b = TicTacToeBoard()
 

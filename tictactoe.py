@@ -57,4 +57,7 @@ class TicTacToeBoard:
             and self.board[2][0] == self.board[1][1] == self.board[0][2]
         ):
             return True
+        # If no more moves possible.
+        if all(" " not in row for row in self.board):
+            return True
         return False
