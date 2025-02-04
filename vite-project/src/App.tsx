@@ -11,23 +11,31 @@ interface Model {
 interface BoardProps {
   model: Model | null;
   player: string;
+  togglePlayer: any;
 }
 
-const click = (row: number, column: number, player: string) => async (_) => {
-  const rawResponse = await fetch("/api/board", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ row: row + 1, column: column + 1, player: player }),
-  });
-  if (!rawResponse.ok) {
-    console.error(await rawResponse.text());
-  }
-};
+const click =
+  (row: number, column: number, player: string, togglePlayer: any) =>
+  async (_) => {
+    const rawResponse = await fetch("/api/board", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        row: row + 1,
+        column: column + 1,
+        player: player,
+      }),
+    });
+    if (!rawResponse.ok) {
+      console.error(await rawResponse.text());
+    }
+    togglePlayer();
+  };
 
-function Board({ model, player }: BoardProps) {
+function Board({ model, player, togglePlayer }: BoardProps) {
   if (model == null || model == undefined) return <div>Loading...</div>;
   console.log("update model", model);
   return (
@@ -37,7 +45,7 @@ function Board({ model, player }: BoardProps) {
           const row = ~~(key / 3);
           const column = ~~(key % 3);
           return (
-            <div key={key} onClick={click(row, column, player)}>
+            <div key={key} onClick={click(row, column, player, togglePlayer)}>
               {model.board[row][column]}
             </div>
           );
@@ -73,15 +81,17 @@ function App() {
     return () => clearInterval(intervalId); // Cleanup interval on component unmount.
   }, [data, error, setData, setError]);
 
+  const togglePlayer = (_) => {
+    setPlayer((p) => (p == "X" ? "O" : "X"));
+  };
+
   return (
     <>
       <h1>TicTacToe</h1>
       <div className="card">
         {error && <div className="error">Error!</div>}
-        <Board model={data} player={player}></Board>
-        <button onClick={() => setPlayer((p) => (p == "X" ? "O" : "X"))}>
-          Player is {player}
-        </button>
+        <Board model={data} player={player} togglePlayer={togglePlayer}></Board>
+        <button onClick={togglePlayer}>Player is {player}</button>
       </div>
     </>
   );
