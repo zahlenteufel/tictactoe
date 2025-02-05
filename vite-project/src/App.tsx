@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import _ from "lodash";
 
 const pollInterval = 1000;
 
@@ -15,8 +16,13 @@ interface BoardProps {
 }
 
 const click =
-  (row: number, column: number, player: string, togglePlayer: any) =>
-  async (_) => {
+  (
+    row: number,
+    column: number,
+    player: string,
+    togglePlayer: any
+  ): React.MouseEventHandler<HTMLDivElement> =>
+  async (_unusedEvent) => {
     const rawResponse = await fetch("/api/board", {
       method: "POST",
       headers: {
@@ -71,7 +77,7 @@ function App() {
         return;
       }
       const json = await response.json();
-      if (JSON.stringify(json) != JSON.stringify(data)) {
+      if (!_.isEqual(json, data)) {
         setData(json);
         console.log("Set data: ", json);
       }
@@ -81,7 +87,7 @@ function App() {
     return () => clearInterval(intervalId); // Cleanup interval on component unmount.
   }, [data, error, setData, setError]);
 
-  const togglePlayer = (_) => {
+  const togglePlayer = (_unusedEvent: unknown) => {
     setPlayer((p) => (p == "X" ? "O" : "X"));
   };
 
