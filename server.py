@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, jsonify, request, render_template
 from tictactoe import TicTacToeBoard, InvalidMoveError
 from werkzeug.exceptions import BadRequest
 import datetime
@@ -13,9 +13,9 @@ CORS(app)
 b = TicTacToeBoard()
 
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template("not_found.html"), 404
+@app.errorhandler(BadRequest)
+def bad_request(error):
+    return jsonify({"error": str(error)}), 400
 
 
 @app.get("/")
