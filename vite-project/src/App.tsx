@@ -3,6 +3,7 @@ import "./App.css";
 import _ from "lodash";
 
 const pollInterval = 1000;
+const apiUrl = "http://localhost:5000";
 
 interface Model {
   board: any;
@@ -23,7 +24,7 @@ const click =
     togglePlayer: any
   ): React.MouseEventHandler<HTMLDivElement> =>
   async (_unusedEvent) => {
-    const rawResponse = await fetch("/api/board", {
+    const rawResponse = await fetch(apiUrl + "/board", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -69,7 +70,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api/board");
+      const response = await fetch(apiUrl + "/board");
       if (!response.ok) {
         const error = await response.text();
         setData(null);

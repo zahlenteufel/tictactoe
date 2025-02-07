@@ -1,12 +1,14 @@
 from flask import Flask, request, render_template
-from tictactoe import TicTacToeBoard
+from tictactoe import TicTacToeBoard, InvalidMoveError
 from werkzeug.exceptions import BadRequest
 import datetime
 import jsonschema
 import random
 import string
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 b = TicTacToeBoard()
 
@@ -38,7 +40,7 @@ move_request_schema = {
 
 
 @app.post("/board")
-def put_board():
+def make_move():
     try:
         d = request.json
     except:
@@ -53,7 +55,7 @@ def put_board():
     try:
         b.make_move(row, column, player)
         return b.get()
-    except ValueError as e:
+    except InvalidMoveError as e:
         raise BadRequest(e.args)
 
 
@@ -71,7 +73,7 @@ def random_str(length: int) -> str:
 def parse_match_request():
     try:
         return request.args.get("id")
-    except:
+    except ValueError:
         raise BadRequest("no id queryparam")
 
 
@@ -88,20 +90,16 @@ def evict_outdated():
 @app.get("/match")
 def get_match():
     id = parse_match_request()
-    try:
+    if id in matched:
+        return {"game_id": matched[id]}
+    last_update[id] = datetime.datetime.now()
+    evict_outdated()
+    if len(last_update) >= 2:
+        game_id = random_str(5)
+        k1, _ = last_update.popitem()
+        k2, _ = last_update.popitem()
+        matched[k1] = {"game_id": game_id, "play_as": "X"}
+        matched[k2] = {"game_id": game_id, "play_as": "O"}
         if id in matched:
-            return {"game_id": matched[id]}
-        last_update[id] = datetime.datetime.now()
-        evict_outdated()
-        if len(last_update) >= 2:
-            game_id = random_str(5)
-            k1, _ = last_update.popitem()
-            k2, _ = last_update.popitem()
-            matched[k1] = {"game_id": game_id, "play_as": "X"}
-            matched[k2] = {"game_id": game_id, "play_as": "O"}
-            if id in matched:
-                return matched[id]
-        return {"game_id": None}
-    finally:
-        print(last_update)
-        print(matched)
+            return matched[id]
+    return {"game_id": None}

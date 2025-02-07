@@ -1,5 +1,5 @@
 import pytest
-from tictactoe import TicTacToeBoard
+from tictactoe import InvalidMoveError, TicTacToeBoard
 
 
 class TestClass:
@@ -29,21 +29,21 @@ class TestClass:
             (1, 1, "XO", "invalid player"),
         ]
         for r, c, p, err in bad_cases:
-            with pytest.raises(ValueError, match=err):
+            with pytest.raises(InvalidMoveError, match=err):
                 b.make_move(r, c, p)
 
     def test_invalid_move_cant_overwrite(self):
         b = TicTacToeBoard()
         b.make_move(1, 1, "X")
 
-        with pytest.raises(ValueError, match="can't overwrite"):
+        with pytest.raises(InvalidMoveError, match="can't overwrite"):
             b.make_move(1, 1, "O")
 
     def test_invalid_move_cant_play_twice(self):
         b = TicTacToeBoard()
         b.make_move(1, 1, "X")
 
-        with pytest.raises(ValueError, match="can't play twice"):
+        with pytest.raises(InvalidMoveError, match="can't play twice"):
             b.make_move(2, 2, "X")
 
     def test_finished(self):
@@ -101,5 +101,5 @@ class TestClass:
             assert not b.is_finished()
             b.make_move(r, c, p)
 
-        with pytest.raises(ValueError, match="finished"):
+        with pytest.raises(InvalidMoveError, match="finished"):
             b.make_move(2, 3, "O")

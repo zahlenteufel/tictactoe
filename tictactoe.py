@@ -1,4 +1,5 @@
-import json
+class InvalidMoveError(Exception):
+    pass
 
 
 class TicTacToeBoard:
@@ -23,15 +24,15 @@ class TicTacToeBoard:
 
     def make_move(self, row, column, player):
         if self.finished:
-            raise ValueError("can't play once it's finished")
+            raise InvalidMoveError("can't play once it's finished")
         if player not in ("X", "O"):
-            raise ValueError("invalid player")
+            raise InvalidMoveError("invalid player")
         if not (1 <= row <= 3 and 1 <= column <= 3):
-            raise ValueError("coordinates out of range")
+            raise InvalidMoveError("coordinates out of range")
         if self.board[row - 1][column - 1] != " ":
-            raise ValueError("can't overwrite")
+            raise InvalidMoveError("can't overwrite")
         if self.current_player == player:
-            raise ValueError("can't play twice")
+            raise InvalidMoveError("can't play twice")
         self.board[row - 1][column - 1] = player
         self.current_player = player
         self.finished = self._check_finished()
