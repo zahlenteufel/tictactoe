@@ -1,48 +1,47 @@
-import { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useContext, useEffect, useState } from "react";
 import "./App.css";
 import _ from "lodash";
+import { PlayerProvider, PlayerContext } from "./PlayerContext";
 
 const pollInterval = 1000;
 const apiUrl = "http://localhost:5000";
 
 interface Model {
-  board: any;
+  board: string[][];
   is_finished: boolean;
 }
 
 interface BoardProps {
   model: Model | null;
-  player: string;
-  togglePlayer: any;
 }
 
-const click =
-  (
-    row: number,
-    column: number,
-    player: string,
-    togglePlayer: any
-  ): React.MouseEventHandler<HTMLDivElement> =>
-  async (_unusedEvent) => {
-    const rawResponse = await fetch(apiUrl + "/board", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        row: row + 1,
-        column: column + 1,
-        player: player,
-      }),
-    });
-    if (!rawResponse.ok) {
-      console.error(await rawResponse.text());
-    }
-    togglePlayer();
-  };
+const makeMove = async (
+  row: number,
+  column: number,
+  player: string
+): boolean => {
+  const rawResponse = await fetch(apiUrl + "/board", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      row: row + 1,
+      column: column + 1,
+      player: player,
+    }),
+  });
+  if (!rawResponse.ok) {
+    console.error(await rawResponse.text());
+    return false;
+  }
+  return true;
+};
 
-function Board({ model, player, togglePlayer }: BoardProps) {
+function Board({ model }: BoardProps) {
+  const { player, togglePlayer } = useContext(PlayerContext)!;
   if (model == null || model == undefined) return <div>Loading...</div>;
   console.log("update model", model);
   return (
@@ -52,7 +51,12 @@ function Board({ model, player, togglePlayer }: BoardProps) {
           const row = ~~(key / 3);
           const column = ~~(key % 3);
           return (
-            <div key={key} onClick={click(row, column, player, togglePlayer)}>
+            <div
+              key={key}
+              onClick={async () => {
+                if (await makeMove(row, column, player)) togglePlayer();
+              }}
+            >
               {model.board[row][column]}
             </div>
           );
@@ -63,8 +67,17 @@ function Board({ model, player, togglePlayer }: BoardProps) {
   );
 }
 
+function PlayerInfo() {
+  const { player, togglePlayer } = useContext(PlayerContext)!;
+
+  return (
+    <div>
+      <button onClick={togglePlayer}>Player is {player}</button>
+    </div>
+  );
+}
+
 function App() {
-  const [player, setPlayer] = useState("X");
   const [data, setData] = useState<Model | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,17 +101,15 @@ function App() {
     return () => clearInterval(intervalId); // Cleanup interval on component unmount.
   }, [data, error, setData, setError]);
 
-  const togglePlayer = (_unusedEvent: unknown) => {
-    setPlayer((p) => (p == "X" ? "O" : "X"));
-  };
-
   return (
     <>
       <h1>TicTacToe</h1>
       <div className="card">
-        {error && <div className="error">Error!</div>}
-        <Board model={data} player={player} togglePlayer={togglePlayer}></Board>
-        <button onClick={togglePlayer}>Player is {player}</button>
+        <PlayerProvider>
+          {error && <div className="error">Error!</div>}
+          <Board model={data}></Board>
+          <PlayerInfo />
+        </PlayerProvider>
       </div>
     </>
   );
