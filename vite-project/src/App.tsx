@@ -20,7 +20,7 @@ const makeMove = async (
   row: number,
   column: number,
   player: string
-): boolean => {
+): Promise<boolean> => {
   const rawResponse = await fetch(apiUrl + "/board", {
     method: "POST",
     headers: {
