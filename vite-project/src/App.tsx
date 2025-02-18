@@ -14,12 +14,14 @@ interface Model {
 
 interface BoardProps {
   model: Model | null;
+  setError: (error: string | null) => void;
 }
 
 const makeMove = async (
   row: number,
   column: number,
-  player: string
+  player: string,
+  setError: (error: string | null) => void
 ): Promise<boolean> => {
   const rawResponse = await fetch(apiUrl + "/board", {
     method: "POST",
@@ -34,13 +36,16 @@ const makeMove = async (
     }),
   });
   if (!rawResponse.ok) {
-    console.error(await rawResponse.text());
+    const err = JSON.parse(await rawResponse.text())["error"] as string;
+    console.error(err);
+    setError(err);
     return false;
   }
+  setError(null);
   return true;
 };
 
-function Board({ model }: BoardProps) {
+function Board({ model, setError }: BoardProps) {
   const { player, togglePlayer } = useContext(PlayerContext)!;
   if (model == null || model == undefined) return <div>Loading...</div>;
   console.log("update model", model);
@@ -54,7 +59,8 @@ function Board({ model }: BoardProps) {
             <div
               key={key}
               onClick={async () => {
-                if (await makeMove(row, column, player)) togglePlayer();
+                if (await makeMove(row, column, player, setError))
+                  togglePlayer();
               }}
             >
               {model.board[row][column]}
@@ -86,8 +92,8 @@ function App() {
       const response = await fetch(apiUrl + "/board");
       if (!response.ok) {
         const error = await response.text();
+        console.log(error);
         setData(null);
-        setError(error === "" ? "some error ocurred" : error);
         return;
       }
       const json = await response.json();
@@ -95,7 +101,6 @@ function App() {
         setData(json);
         console.log("Set data: ", json);
       }
-      setError(null);
     };
     const intervalId = setInterval(fetchData, pollInterval);
     return () => clearInterval(intervalId); // Cleanup interval on component unmount.
@@ -106,8 +111,8 @@ function App() {
       <h1>TicTacToe</h1>
       <div className="card">
         <PlayerProvider>
-          {error && <div className="error">Error!</div>}
-          <Board model={data}></Board>
+          {error && <div className="error">{error}</div>}
+          <Board model={data} setError={setError}></Board>
           <PlayerInfo />
         </PlayerProvider>
       </div>
