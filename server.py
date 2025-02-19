@@ -6,11 +6,21 @@ import jsonschema
 import random
 import string
 from flask_cors import CORS
+from typing import Dict
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:5173"], methods=["GET", "POST", "PUT", "DELETE"])
 
-b = TicTacToeBoard()
+
+class Game:
+
+    def __init__(self, username1, username2):
+        self.playerX = username1
+        self.playerO = username2
+        self.board = TicTacToeBoard()
+
+
+games: Dict[str, Game] = {}
 
 
 @app.errorhandler(BadRequest)
@@ -18,14 +28,11 @@ def bad_request(error):
     return jsonify({"error": str(error)}), 400
 
 
-@app.get("/")
-def hello_world():
-    return app.redirect("/board")
-
-
-@app.get("/board")
-def get_board():
-    return b.get()
+@app.get("/game/<game_id>")
+def get_board(game_id):
+    if game_id not in games:
+        raise BadRequest("Game not found")
+    return games[game_id].board.get()
 
 
 move_request_schema = {
@@ -39,8 +46,11 @@ move_request_schema = {
 }
 
 
-@app.post("/board")
-def make_move():
+@app.post("/game/<game_id>/board")
+def make_move(game_id):
+    if game_id not in games:
+        raise BadRequest("Game not found")
+    b = games[game_id].board
     try:
         d = request.json
     except:
@@ -100,6 +110,7 @@ def get_match():
         k2, _ = last_update.popitem()
         matched[k1] = {"game_id": game_id, "play_as": "X"}
         matched[k2] = {"game_id": game_id, "play_as": "O"}
+        games[game_id] = Game(k1, k2)
         if user_id in matched:
             return matched[user_id]
     return {"game_id": None}

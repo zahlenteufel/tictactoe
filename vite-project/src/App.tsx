@@ -13,6 +13,7 @@ interface Model {
 
 interface BoardProps {
   model: Model | null;
+  game_id: string;
   setError: (error: string | null) => void;
 }
 
@@ -20,9 +21,10 @@ const makeMove = async (
   row: number,
   column: number,
   player: string,
+  game_id: string,
   setError: (error: string | null) => void
 ): Promise<boolean> => {
-  const rawResponse = await fetch(apiUrl + "/board", {
+  const rawResponse = await fetch(`${apiUrl}/game/${game_id}/board`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -44,7 +46,7 @@ const makeMove = async (
   return true;
 };
 
-function Board({ model, setError }: BoardProps) {
+function Board({ model, setError, game_id }: BoardProps) {
   const { player, togglePlayer } = useContext(PlayerContext)!;
   if (model == null || model == undefined) return <div>Loading...</div>;
   console.log("update model", model);
@@ -58,7 +60,7 @@ function Board({ model, setError }: BoardProps) {
             <div
               key={key}
               onClick={async () => {
-                if (await makeMove(row, column, player, setError))
+                if (await makeMove(row, column, player, game_id, setError))
                   togglePlayer();
               }}
             >
@@ -82,13 +84,17 @@ function PlayerInfo() {
   );
 }
 
-function GameInCourse() {
+interface GameInCourseProps {
+  game_id: string;
+}
+
+function GameInCourse({ game_id }: GameInCourseProps) {
   const [data, setData] = useState<Model | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(apiUrl + "/board");
+      const response = await fetch(`${apiUrl}/game/${game_id}`);
       if (!response.ok) {
         const error = await response.text();
         console.log(error);
@@ -103,7 +109,7 @@ function GameInCourse() {
     };
     const intervalId = setInterval(fetchData, pollInterval);
     return () => clearInterval(intervalId); // Cleanup interval on component unmount.
-  }, [data, error, setData, setError]);
+  }, [data, error, game_id, setData, setError]);
 
   return (
     <>
@@ -111,7 +117,7 @@ function GameInCourse() {
       <div className="card">
         <PlayerProvider>
           {error && <div className="error">{error}</div>}
-          <Board model={data} setError={setError}></Board>
+          <Board model={data} setError={setError} game_id={game_id}></Board>
           <PlayerInfo />
         </PlayerProvider>
       </div>
@@ -125,7 +131,7 @@ function App() {
   if (game === null) {
     return <WaitingRoom initGame={setGame} />;
   } else {
-    return <GameInCourse />;
+    return <GameInCourse game_id={game.id} />;
   }
 }
 
