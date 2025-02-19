@@ -1,7 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import _ from "lodash";
-import { PlayerProvider, PlayerContext } from "./PlayerContext";
 import WaitingRoom from "./WaitingRoom";
 import { pollInterval, apiUrl } from "./constants";
 import Game from "./Game";
@@ -105,15 +104,13 @@ function GameInCourse({ game_id, username }: GameInCourseProps) {
     <>
       <h1>TicTacToe</h1>
       <div className="card">
-        <PlayerProvider>
-          {error && <div className="error">{error}</div>}
-          <Board
-            model={data}
-            setError={setError}
-            game_id={game_id}
-            username={username}
-          ></Board>
-        </PlayerProvider>
+        {error && <div className="error">{error}</div>}
+        <Board
+          model={data}
+          setError={setError}
+          game_id={game_id}
+          username={username}
+        ></Board>
       </div>
     </>
   );
