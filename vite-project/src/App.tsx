@@ -3,11 +3,9 @@ import { useContext, useEffect, useState } from "react";
 import "./App.css";
 import _ from "lodash";
 import { PlayerProvider, PlayerContext } from "./PlayerContext";
-import { v4 as uuidv4 } from "uuid";
-
-const pollInterval = 1000; // 1 second
-const connectPollInterval = 1000; // 1 second
-const apiUrl = "http://localhost:5000";
+import WaitingRoom from "./WaitingRoom";
+import { pollInterval, apiUrl } from "./constants";
+import Game from "./Game";
 
 interface Model {
   board: string[][];
@@ -122,72 +120,11 @@ function GameInCourse() {
   );
 }
 
-interface Game {
-  id: string;
-  username: string;
-}
-
-interface WaitingRoomProps {
-  initGame: (game: Game) => void;
-}
-
-function WaitingRoom({ initGame }: WaitingRoomProps) {
-  const [username, setUsername] = useState<string>(
-    `user${uuidv4().slice(0, 4)}`
-  );
-  const [isConnecting, setIsConnecting] = useState(false);
-
-  const handleConnect = () => {
-    setIsConnecting(true);
-
-    const intervalId = setInterval(() => {
-      fetch(`${apiUrl}/match?id=${username}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.game_id != null) {
-            initGame({ id: data.game_id, username: username });
-            clearInterval(intervalId);
-            setIsConnecting(false);
-            console.log("Match found!");
-          } else {
-            console.log("No match found");
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          // We'll be retrying anyway.
-        });
-    }, connectPollInterval);
-  };
-
-  return (
-    <div>
-      <label>
-        Username:
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          disabled={isConnecting}
-        />
-      </label>
-      <button onClick={handleConnect} disabled={isConnecting}>
-        {isConnecting ? "Connecting..." : "Connect to a room"}
-      </button>
-    </div>
-  );
-}
-
 function App() {
   const [game, setGame] = useState<Game | null>(null);
 
   if (game === null) {
-    return <WaitingRoom initGame={(g: Game) => setGame(g)} />;
+    return <WaitingRoom initGame={setGame} />;
   } else {
     return <GameInCourse />;
   }
