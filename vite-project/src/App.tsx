@@ -14,13 +14,14 @@ interface Model {
 interface BoardProps {
   model: Model | null;
   game_id: string;
+  username: string;
   setError: (error: string | null) => void;
 }
 
 const makeMove = async (
   row: number,
   column: number,
-  player: string,
+  username: string,
   game_id: string,
   setError: (error: string | null) => void
 ): Promise<boolean> => {
@@ -33,7 +34,7 @@ const makeMove = async (
     body: JSON.stringify({
       row: row + 1,
       column: column + 1,
-      player: player,
+      username: username,
     }),
   });
   if (!rawResponse.ok) {
@@ -46,8 +47,7 @@ const makeMove = async (
   return true;
 };
 
-function Board({ model, setError, game_id }: BoardProps) {
-  const { player, togglePlayer } = useContext(PlayerContext)!;
+function Board({ model, setError, username, game_id }: BoardProps) {
   if (model == null || model == undefined) return <div>Loading...</div>;
   console.log("update model", model);
   return (
@@ -60,8 +60,7 @@ function Board({ model, setError, game_id }: BoardProps) {
             <div
               key={key}
               onClick={async () => {
-                if (await makeMove(row, column, player, game_id, setError))
-                  togglePlayer();
+                await makeMove(row, column, username, game_id, setError);
               }}
             >
               {model.board[row][column]}
@@ -74,21 +73,12 @@ function Board({ model, setError, game_id }: BoardProps) {
   );
 }
 
-function PlayerInfo() {
-  const { player, togglePlayer } = useContext(PlayerContext)!;
-
-  return (
-    <div>
-      <button onClick={togglePlayer}>Player is {player}</button>
-    </div>
-  );
-}
-
 interface GameInCourseProps {
   game_id: string;
+  username: string;
 }
 
-function GameInCourse({ game_id }: GameInCourseProps) {
+function GameInCourse({ game_id, username }: GameInCourseProps) {
   const [data, setData] = useState<Model | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,8 +107,12 @@ function GameInCourse({ game_id }: GameInCourseProps) {
       <div className="card">
         <PlayerProvider>
           {error && <div className="error">{error}</div>}
-          <Board model={data} setError={setError} game_id={game_id}></Board>
-          <PlayerInfo />
+          <Board
+            model={data}
+            setError={setError}
+            game_id={game_id}
+            username={username}
+          ></Board>
         </PlayerProvider>
       </div>
     </>
@@ -131,7 +125,7 @@ function App() {
   if (game === null) {
     return <WaitingRoom initGame={setGame} />;
   } else {
-    return <GameInCourse game_id={game.id} />;
+    return <GameInCourse game_id={game.id} username={game.username} />;
   }
 }
 

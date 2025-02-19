@@ -40,9 +40,9 @@ move_request_schema = {
     "properties": {
         "row": {"type": "integer", "minimum": 1, "maximum": 3},
         "column": {"type": "integer", "minimum": 1, "maximum": 3},
-        "player": {"type": "string", "enum": ["X", "O"]},
+        "username": {"type": "string", "minLength": 4},
     },
-    "required": ["row", "column", "player"],
+    "required": ["row", "column", "username"],
 }
 
 
@@ -61,7 +61,10 @@ def make_move(game_id):
         raise BadRequest("invalid parameters:" + str(ee))
     row = d["row"]
     column = d["column"]
-    player = d["player"]
+    username = d["username"]
+    if username not in (games[game_id].playerX, games[game_id].playerO):
+        raise BadRequest("invalid username")
+    player = "X" if username == games[game_id].playerX else "O"
     try:
         b.make_move(row, column, player)
         return b.get()
@@ -101,7 +104,7 @@ def evict_outdated():
 def get_match():
     user_id = parse_match_request()
     if user_id in matched:
-        return {"game_id": matched[user_id]}
+        return matched[user_id]
     last_update[user_id] = datetime.datetime.now()
     evict_outdated()
     if len(last_update) >= 2:

@@ -26,6 +26,7 @@ function WaitingRoom({ initGame }: WaitingRoomProps) {
         .then((response) => response.json())
         .then((data) => {
           if (data.game_id != null) {
+            console.log(data);
             initGame({ id: data.game_id, username: username });
             clearInterval(intervalId);
             setIsConnecting(false);
