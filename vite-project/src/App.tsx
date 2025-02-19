@@ -23,7 +23,7 @@ const makeMove = async (
   username: string,
   game_id: string,
   setError: (error: string | null) => void
-): Promise<boolean> => {
+) => {
   const rawResponse = await fetch(`${apiUrl}/game/${game_id}/board`, {
     method: "POST",
     headers: {
@@ -36,14 +36,14 @@ const makeMove = async (
       username: username,
     }),
   });
-  if (!rawResponse.ok) {
-    const err = JSON.parse(await rawResponse.text())["error"] as string;
-    console.error(err);
-    setError(err);
-    return false;
+  if (rawResponse.ok) {
+    setError(null);
+    return;
   }
-  setError(null);
-  return true;
+  const err = JSON.parse(await rawResponse.text())["error"] as string;
+  console.error(err);
+  setError(err);
+  return;
 };
 
 function Board({ model, setError, username, game_id }: BoardProps) {
