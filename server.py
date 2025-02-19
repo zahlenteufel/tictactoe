@@ -80,19 +80,19 @@ def parse_match_request():
 def evict_outdated():
     now = datetime.datetime.now()
     keys_to_remove = []
-    for id, t in last_update.items():
+    for user_id, t in last_update.items():
         if now - t > TTL:
-            keys_to_remove.append(id)
+            keys_to_remove.append(user_id)
     for k in keys_to_remove:
         del last_update[k]
 
 
 @app.get("/match")
 def get_match():
-    id = parse_match_request()
-    if id in matched:
-        return {"game_id": matched[id]}
-    last_update[id] = datetime.datetime.now()
+    user_id = parse_match_request()
+    if user_id in matched:
+        return {"game_id": matched[user_id]}
+    last_update[user_id] = datetime.datetime.now()
     evict_outdated()
     if len(last_update) >= 2:
         game_id = random_str(5)
@@ -100,6 +100,6 @@ def get_match():
         k2, _ = last_update.popitem()
         matched[k1] = {"game_id": game_id, "play_as": "X"}
         matched[k2] = {"game_id": game_id, "play_as": "O"}
-        if id in matched:
-            return matched[id]
+        if user_id in matched:
+            return matched[user_id]
     return {"game_id": None}
