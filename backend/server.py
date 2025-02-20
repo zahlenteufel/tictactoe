@@ -116,3 +116,7 @@ def get_match():
         if user_id in matched:
             return matched[user_id]
     return {"game_id": None}
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

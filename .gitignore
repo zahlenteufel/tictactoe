@@ -1,5 +1,7 @@
 .vscode/*
 __pycache__/*
+backend/__pycache__/
+integration_tests/__pycache__/
 .coverage
 
 node_modules
