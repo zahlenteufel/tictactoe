@@ -22,18 +22,21 @@ def test_match_with_missing_id_fails(client):
 
 def test_match_success(client):
     client.get("/match?id=user1")
-    client.get("/match?id=user2")
 
-    response = client.get("/match?id=user1")
+    response = client.get("/match?id=user2")
 
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
     data = response.json
-    assert "game_id" in data
     assert data["game_id"] is not None
+    game_id2 = data["game_id"]
+
+    game_id1 = client.get("/match?id=user1").json["game_id"]
+
+    assert game_id1 == game_id2
 
 
-def test_cant_match_expired_user(client):
+def test_cannot_match_expired_user(client):
     client.get("/match?id=user1")
 
     with freezegun.freeze_time(
@@ -48,5 +51,14 @@ def test_user_cannot_match_themselves(client):
     client.get("/match?id=user1")
 
     response = client.get("/match?id=user1").json
+
+    assert response["game_id"] is None
+
+
+def test_user_cannot_match_already_matched(client):
+    client.get("/match?id=user1")
+    client.get("/match?id=user2")
+
+    response = client.get("/match?id=user3").json
 
     assert response["game_id"] is None
