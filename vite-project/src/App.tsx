@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
 import WaitingRoom from "./WaitingRoom";
-import Game from "./Game";
 import { GameInCourse } from "./GameInCourse";
 
 function App() {
-  const [game, setGame] = useState<Game | null>(null);
-
-  if (game === null) {
-    return <WaitingRoom initGame={setGame} />;
-  } else {
-    return <GameInCourse id={game.id} username={game.username} />;
-  }
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/match" replace />} />
+        <Route path="/match" element={<WaitingRoom />} />
+        <Route path="/game/:game_id" element={<GameInCourse />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

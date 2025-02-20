@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import _ from "lodash";
 import { pollInterval, apiUrl } from "./constants";
-import Game from "./Game";
 import { Model, Board } from "./Board";
+import { useParams, useLocation } from "react-router-dom";
 
-function GameInCourse({ id, username }: Game) {
+function GameInCourse() {
+  const { game_id } = useParams();
+  const { search } = useLocation();
+  const username = new URLSearchParams(search).get("username");
   const [data, setData] = useState<Model | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${apiUrl}/game/${id}`);
+      const response = await fetch(`${apiUrl}/game/${game_id}`);
       if (!response.ok) {
         const error = await response.text();
         console.log(error);
@@ -25,7 +28,7 @@ function GameInCourse({ id, username }: Game) {
     };
     const intervalId = setInterval(fetchData, pollInterval);
     return () => clearInterval(intervalId); // Cleanup interval on component unmount.
-  }, [data, error, id, setData, setError]);
+  }, [data, error, game_id, setData, setError]);
 
   return (
     <>
@@ -35,8 +38,8 @@ function GameInCourse({ id, username }: Game) {
         <Board
           model={data}
           setError={setError}
-          game_id={id}
-          username={username}
+          game_id={game_id!}
+          username={username!}
         ></Board>
       </div>
     </>

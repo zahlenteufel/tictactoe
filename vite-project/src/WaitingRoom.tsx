@@ -1,13 +1,10 @@
 import { useState } from "react";
-import Game from "./Game";
 import { v4 as uuidv4 } from "uuid";
 import { apiUrl, connectPollInterval } from "./constants";
+import { useNavigate } from "react-router-dom";
 
-interface WaitingRoomProps {
-  initGame: (game: Game) => void;
-}
-
-function WaitingRoom({ initGame }: WaitingRoomProps) {
+function WaitingRoom() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState<string>(
     `user${uuidv4().slice(0, 4)}`
   );
@@ -27,10 +24,10 @@ function WaitingRoom({ initGame }: WaitingRoomProps) {
         .then((data) => {
           if (data.game_id != null) {
             console.log(data);
-            initGame({ id: data.game_id, username: username });
             clearInterval(intervalId);
             setIsConnecting(false);
             console.log("Match found!");
+            navigate(`/game/${data.game_id}?username=${username}`);
           } else {
             console.log("No match found");
           }
