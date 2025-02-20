@@ -84,10 +84,9 @@ def random_str(length: int) -> str:
 
 
 def parse_match_request():
-    try:
-        return request.args.get("id")
-    except ValueError:
+    if "id" not in request.args:
         raise BadRequest("no id queryparam")
+    return request.args.get("id")
 
 
 def evict_outdated():
